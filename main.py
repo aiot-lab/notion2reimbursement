@@ -72,6 +72,7 @@ if __name__ == "__main__":
 
     results = query_database(notion, database_id, claimant_name)
 
+    claimant = Claimant(name=claimant_name)
     for i, result in enumerate(results):
         item_name = result["properties"]["Item"]["title"][0]["text"]["content"]
         if item_name is None:
@@ -91,8 +92,14 @@ if __name__ == "__main__":
         except KeyError:
             raise KeyError("Please check the column name of Phone")
 
-        claimant = Claimant(name=name, id=id, email=email, phone=phone)
-        wb = write_wb_info(wb, creation_date, claimant)
+        if name is not None:
+            claimant.set_name(name)
+        if id is not None:
+            claimant.set_id(id)
+        if email is not None:
+            claimant.set_email(email)
+        if phone is not None:
+            claimant.set_phone(phone)
 
         try:
             price = result["properties"]["Price"]["rich_text"][0]['text']['content']
@@ -147,5 +154,6 @@ if __name__ == "__main__":
     print(f"\033[94m HKD Total:\033[0m \033[4m{hkd_price_total}\033[0m")
     print(f"\033[94m RMB Total:\033[0m \033[4m{rmb_price_total}\033[0m")
     wb = write_wb_price(wb, hkd_price_total, rmb_price_total)
+    wb = write_wb_info(wb, creation_date, claimant)
     wb.save(os.path.join(save_folder, output_file))
     os.remove(output_file)

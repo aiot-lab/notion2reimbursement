@@ -1,5 +1,5 @@
 class Claimant:
-    def __init__(self, name, id, email, phone):
+    def __init__(self, name=None, id=None, email=None, phone=None):
         self.name = name
         self.id = id
         self.email = email
