@@ -28,7 +28,8 @@ See our Notion Page for details.
 ## Result
 
 It will create a folder in your `save_root`. Here is an example:
-'''yaml
+
+```yaml
 ├── 2023-08-11-<your_name>
 │   ├── 1-Wellue ECG
 │   │   ├── Wellue ECG_0.pdf
@@ -37,5 +38,5 @@ It will create a folder in your `save_root`. Here is an example:
 │   │   ├── Polar H10 _0.pdf
 │   │   └── Polar H10 _1.jpg
 │   └── reimbursement_<your_name>_2023-08-11.xlsx
-'''
+```
 
