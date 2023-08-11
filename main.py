@@ -150,6 +150,7 @@ if __name__ == "__main__":
                 file_name = f"{item_name}_{file_idx}.jpg"
                 with open(os.path.join(item_path, file_name), 'wb') as f:
                     f.write(r.content)
+                file_idx += 1
     hkd_price_total = sum(hkd_price)
     rmb_price_total = sum(rmb_price)
 
