@@ -81,16 +81,20 @@ if __name__ == "__main__":
         logger.info(f"Processing {item_name}")
         try:
             name = result["properties"]["PoC"]['select']['name']
-            id = result["properties"]["Staff/Student ID"]['select']['name']
-            email = result["properties"]["Email"]['email']
+            id = result['properties']['Staff/Student ID']['rollup']['array'][0]['number']
+            email = result['properties']['Email']['rollup']['array'][0]['email']
         except KeyError:
             raise KeyError(
                 "Please check the column name of PoC, Staff/Student ID, Email")
+        except IndexError:
+            email = None
 
         try:
-            phone = result["properties"]["Phone"]['phone_number']
+            phone = result['properties']['Phone']['rollup']['array'][0]['phone_number']
         except KeyError:
             raise KeyError("Please check the column name of Phone")
+        except IndexError:
+            phone = None
 
         if name is not None:
             claimant.set_name(name)
