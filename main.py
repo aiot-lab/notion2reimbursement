@@ -16,6 +16,8 @@ import json
 with open("config.yaml", "r") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
+BLOCK_TYPE = ["pdf", "image", "file"]
+
 # >>>>>>>>>>>>>>>>>>>>>>>>>>> Config >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 template_file = "reimbursement.xlsx"
 
@@ -139,13 +141,13 @@ if __name__ == "__main__":
         file_idx = 0
         for block in blocks:
             block_type = block["type"]
-            if block_type == "paragraph":
+            if block_type not in BLOCK_TYPE:
                 continue
             try:
                 url = block[block_type]["file"]["url"]
                 r = requests.get(url, allow_redirects=True)
                 ext = url.split("?")[0].split("/")[-1]
-                file_name = f"{item_name}_{file_idx}.{ext}"
+                file_name = f"{item_name}_{file_idx}_{ext}"
                 with open(os.path.join(item_path, file_name), 'wb') as f:
                     f.write(r.content)
                 file_idx += 1
