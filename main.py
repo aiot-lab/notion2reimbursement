@@ -5,11 +5,13 @@ import shutil
 import requests
 import os
 from loguru import logger
+from math import fsum
 
 from Ritem import RItem, Claimant
 from write_wb import write_wb_info, write_wb_item, write_wb_price
 
 import yaml
+import json
 
 with open("config.yaml", "r") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
@@ -137,22 +139,36 @@ if __name__ == "__main__":
         file_idx = 0
         for block in blocks:
             block_type = block["type"]
-            if block_type == "pdf":
-                url = block['pdf']["file"]["url"]
+            if block_type == "paragraph":
+                continue
+            try:
+                url = block[block_type]["file"]["url"]
                 r = requests.get(url, allow_redirects=True)
-                file_name = f"{item_name}_{file_idx}.pdf"
+                ext = url.split("?")[0].split("/")[-1]
+                file_name = f"{item_name}_{file_idx}.{ext}"
                 with open(os.path.join(item_path, file_name), 'wb') as f:
                     f.write(r.content)
                 file_idx += 1
-            elif block_type == "image":
-                url = block["image"]["file"]["url"]
-                r = requests.get(url, allow_redirects=True)
-                file_name = f"{item_name}_{file_idx}.jpg"
-                with open(os.path.join(item_path, file_name), 'wb') as f:
-                    f.write(r.content)
-                file_idx += 1
-    hkd_price_total = sum(hkd_price)
-    rmb_price_total = sum(rmb_price)
+            except:
+                print(json.dumps(block, indent=4))
+                exit()
+            # if block_type == "pdf":
+            #     url = block['pdf']["file"]["url"]
+            #     r = requests.get(url, allow_redirects=True)
+            #     file_name = f"{item_name}_{file_idx}.pdf"
+            #     with open(os.path.join(item_path, file_name), 'wb') as f:
+            #         f.write(r.content)
+            #     file_idx += 1
+            # elif block_type == "image":
+            #     url = block["image"]["file"]["url"]
+            #     r = requests.get(url, allow_redirects=True)
+            #     file_name = f"{item_name}_{file_idx}.jpg"
+            #     with open(os.path.join(item_path, file_name), 'wb') as f:
+            #         f.write(r.content)
+            #     file_idx += 1
+    print(hkd_price)
+    hkd_price_total = fsum(hkd_price)
+    rmb_price_total = fsum(rmb_price)
 
     for item in items:
         print(item)
