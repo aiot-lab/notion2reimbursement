@@ -18,6 +18,8 @@ with open("config.yaml", "r") as f:
 
 BLOCK_TYPE = ["pdf", "image", "file"]
 
+RETURNED_SYMBOL = ["/", "\\", ":", "*", "?", "\"", "<", ">", "|"]
+
 # >>>>>>>>>>>>>>>>>>>>>>>>>>> Config >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 template_file = "reimbursement.xlsx"
 
@@ -82,6 +84,9 @@ if __name__ == "__main__":
         if item_name is None:
             continue
 
+        # Remove the invalid symbol
+        for symbol in RETURNED_SYMBOL:
+            item_name = item_name.replace(symbol, "")
         logger.info(f"Processing {item_name}")
         try:
             name = result["properties"]["PoC"]['select']['name']
