@@ -125,8 +125,21 @@ if __name__ == "__main__":
         except IndexError:
             raise IndexError(
                 "Please check the price format, should be '100 HKD' or '100 RMB'")
+        
+        try:
+            account = result["properties"]["Account"]["rich_text"][0]['text']['content']
+            logger.debug(f"Account: {account}")
+            if len(account) > 0:
+                claimant.set_account(account)
+            else:
+                account = None
+        except KeyError:
+            raise KeyError("Please check the column name of Account")
+        except IndexError:  
+            raise IndexError(
+                "Please check the account format")
 
-        item = RItem(item_name=item_name, item_price=price)
+        item = RItem(item_name=item_name, item_price=price, account=account)
         wb = write_wb_item(wb, item)
 
         save_folder = os.path.join(save_root, f'{creation_date}-{name}')

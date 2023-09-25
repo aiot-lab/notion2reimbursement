@@ -16,16 +16,20 @@ class Claimant:
 
     def set_phone(self, phone):
         self.phone = phone
+    
+    def set_account(self, account):
+        self.account = account
 
 
 class RItem():
-    def __init__(self, item_name, item_price, idx=None):
+    def __init__(self, item_name, item_price, idx=None, account = None):
         self.item_name = item_name
         self.item_price = item_price
         # self.item_proof = item_proof
         # self.claimant = Claimant(name, id, email, phone)
         if idx:
             self.item_idx = idx
+        self.account = account
         # else:
         #     self.item_idx = self._create_idx()
 
