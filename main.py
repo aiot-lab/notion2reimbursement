@@ -39,6 +39,7 @@ hkd_price = []
 rmb_price = []
 map_price_dict = {
     "RMB": rmb_price,
+    "CNY": rmb_price,
     "HKD": hkd_price,
 }
 
@@ -134,10 +135,10 @@ if __name__ == "__main__":
             else:
                 account = None
         except KeyError:
-            raise KeyError("Please check the column name of Account")
+            pass
         except IndexError:  
-            raise IndexError(
-                "Please check the account format")
+            account = None
+            
 
         item = RItem(item_name=item_name, item_price=price, account=account)
         wb = write_wb_item(wb, item)
@@ -187,8 +188,12 @@ if __name__ == "__main__":
             #         f.write(r.content)
             #     file_idx += 1
     print(hkd_price)
+    print(rmb_price)
     hkd_price_total = fsum(hkd_price)
     rmb_price_total = fsum(rmb_price)
+    
+    hkd_price_total = round(hkd_price_total, 2)
+    rmb_price_total = round(rmb_price_total, 2)
 
     for item in items:
         print(item)
