@@ -205,13 +205,16 @@ if __name__ == "__main__":
 
         # Save merged PDF
         merged_pdf_path = os.path.join(
-            save_folder, f"{item_name}_receipt_merged.pdf")
+            save_folder, f"{claimant_name}_{creation_date}_receipt_merged.pdf")
         merger.write(merged_pdf_path)
         merger.close()
 
-        # # Remove individual files after merging
-        # for file_path, _ in downloaded_files:
-        #     os.remove(file_path)
+        # Remove individual files after merging
+        for file_path, _ in downloaded_files:
+            parent_dir = os.path.dirname(file_path)
+            if os.path.exists(parent_dir):
+                shutil.rmtree(parent_dir)
+
     print(hkd_price)
     print(rmb_price)
     hkd_price_total = fsum(hkd_price)
