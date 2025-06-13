@@ -1,7 +1,7 @@
 class Claimant:
     def __init__(self, name=None, id=None, email=None, phone=None):
         self.name = name
-        self.id = id
+        self.uid = id
         self.email = email
         self.phone = phone
 
@@ -9,7 +9,7 @@ class Claimant:
         self.name = name
 
     def set_id(self, id):
-        self.id = id
+        self.uid = id
 
     def set_email(self, email):
         self.email = email

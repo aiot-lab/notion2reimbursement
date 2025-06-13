@@ -6,7 +6,7 @@ def write_wb_info(wb: Workbook, date: str, claimant: Claimant):
     sheet = wb.worksheets[0]
     sheet['C10'] = date
     sheet['F13'] = claimant.name
-    sheet['E16'] = claimant.id
+    sheet['E16'] = claimant.uid
     sheet['F19'] = claimant.email
     sheet['F20'] = claimant.phone
     return wb

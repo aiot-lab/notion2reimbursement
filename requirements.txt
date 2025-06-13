@@ -1,0 +1,7 @@
+notion-client
+openpyxl
+loguru
+pyyaml
+PyPDF2
+Pillow 
+reportlab

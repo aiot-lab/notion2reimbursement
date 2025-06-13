@@ -6,6 +6,9 @@ import requests
 import os
 from loguru import logger
 from math import fsum
+from PyPDF2 import PdfMerger
+from PIL import Image
+import io
 
 from Ritem import RItem, Claimant
 from write_wb import write_wb_info, write_wb_item, write_wb_price
@@ -32,6 +35,8 @@ claimant_name = config['claimant_name']
 
 save_root = config["save_root"]
 
+claimant_name = config['claimant_name']
+
 # >>>>>>>>>>>>>>>>>>>>>>>>>>> Init >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 items = []
 
@@ -44,6 +49,15 @@ map_price_dict = {
 }
 
 creation_date = dt.datetime.now().strftime("%Y-%m-%d")
+
+save_folder = os.path.join(save_root, f'{creation_date}-{claimant_name}')
+if not os.path.exists(save_folder):
+    os.makedirs(save_folder)
+else:
+    logger.warning(
+        f"Save folder already exists: {save_folder}, will delete it")
+    shutil.rmtree(save_folder)
+    os.makedirs(save_folder)
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>> Notion Database >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -80,6 +94,7 @@ if __name__ == "__main__":
     results = query_database(notion, database_id, claimant_name)
 
     claimant = Claimant(name=claimant_name)
+    downloaded_files = []  # Keep track of downloaded files to merge
     for i, result in enumerate(results):
         item_name = result["properties"]["Item"]["title"][0]["text"]["content"]
         if item_name is None:
@@ -126,7 +141,7 @@ if __name__ == "__main__":
         except IndexError:
             raise IndexError(
                 "Please check the price format, should be '100 HKD' or '100 RMB'")
-        
+
         try:
             account = result["properties"]["Account"]["rich_text"][0]['text']['content']
             logger.debug(f"Account: {account}")
@@ -136,16 +151,12 @@ if __name__ == "__main__":
                 account = None
         except KeyError:
             pass
-        except IndexError:  
+        except IndexError:
             account = None
-            
 
         item = RItem(item_name=item_name, item_price=price, account=account)
         wb = write_wb_item(wb, item)
 
-        save_folder = os.path.join(save_root, f'{creation_date}-{name}')
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
         item_folder = str(item.item_idx) + "-" + item_name
         item_path = os.path.join(save_folder, item_folder)
         if not os.path.exists(item_path):
@@ -158,6 +169,7 @@ if __name__ == "__main__":
         page_id = result['id']
         blocks = notion.blocks.children.list(block_id=page_id).get("results")
         file_idx = 0
+
         for block in blocks:
             block_type = block["type"]
             if block_type not in BLOCK_TYPE:
@@ -167,31 +179,44 @@ if __name__ == "__main__":
                 r = requests.get(url, allow_redirects=True)
                 ext = url.split("?")[0].split("/")[-1]
                 file_name = f"{item_name}_{file_idx}_{ext}"
-                with open(os.path.join(item_path, file_name), 'wb') as f:
+                file_path = os.path.join(item_path, file_name)
+                with open(file_path, 'wb') as f:
                     f.write(r.content)
+                downloaded_files.append((file_path, block_type))
                 file_idx += 1
             except:
                 print(json.dumps(block, indent=4))
                 exit()
-            # if block_type == "pdf":
-            #     url = block['pdf']["file"]["url"]
-            #     r = requests.get(url, allow_redirects=True)
-            #     file_name = f"{item_name}_{file_idx}.pdf"
-            #     with open(os.path.join(item_path, file_name), 'wb') as f:
-            #         f.write(r.content)
-            #     file_idx += 1
-            # elif block_type == "image":
-            #     url = block["image"]["file"]["url"]
-            #     r = requests.get(url, allow_redirects=True)
-            #     file_name = f"{item_name}_{file_idx}.jpg"
-            #     with open(os.path.join(item_path, file_name), 'wb') as f:
-            #         f.write(r.content)
-            #     file_idx += 1
+
+    # Merge all files into one PDF
+    if downloaded_files:
+        merger = PdfMerger()
+        for file_path, block_type in downloaded_files:
+            if block_type == "pdf":
+                merger.append(file_path)
+            elif block_type == "image":
+                # Convert image to PDF
+                img = Image.open(file_path)
+                pdf_path = file_path.rsplit('.', 1)[0] + '.pdf'
+                img.save(pdf_path, 'PDF')
+                merger.append(pdf_path)
+                # Remove temporary PDF
+                os.remove(pdf_path)
+
+        # Save merged PDF
+        merged_pdf_path = os.path.join(
+            save_folder, f"{item_name}_receipt_merged.pdf")
+        merger.write(merged_pdf_path)
+        merger.close()
+
+        # # Remove individual files after merging
+        # for file_path, _ in downloaded_files:
+        #     os.remove(file_path)
     print(hkd_price)
     print(rmb_price)
     hkd_price_total = fsum(hkd_price)
     rmb_price_total = fsum(rmb_price)
-    
+
     hkd_price_total = round(hkd_price_total, 2)
     rmb_price_total = round(rmb_price_total, 2)
 
