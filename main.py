@@ -94,7 +94,6 @@ if __name__ == "__main__":
     results = query_database(notion, database_id, claimant_name)
 
     claimant = Claimant(name=claimant_name)
-    downloaded_files = []  # Keep track of downloaded files to merge
     for i, result in enumerate(results):
         item_name = result["properties"]["Item"]["title"][0]["text"]["content"]
         if item_name is None:
@@ -179,39 +178,13 @@ if __name__ == "__main__":
                 r = requests.get(url, allow_redirects=True)
                 ext = url.split("?")[0].split("/")[-1]
                 file_name = f"{item_name}_{file_idx}_{ext}"
-                file_path = os.path.join(item_path, file_name)
-                with open(file_path, 'wb') as f:
+                with open(os.path.join(item_path, file_name), 'wb') as f:
                     f.write(r.content)
-                downloaded_files.append((file_path, block_type))
                 file_idx += 1
             except:
                 print(json.dumps(block, indent=4))
                 exit()
 
-    # Merge all files into one PDF
-    if downloaded_files:
-        merger = PdfMerger()
-        for file_path, block_type in downloaded_files:
-            if block_type == "pdf":
-                merger.append(file_path)
-            elif block_type == "image":
-                # Convert image to PDF
-                img = Image.open(file_path)
-                pdf_path = file_path.rsplit('.', 1)[0] + '.pdf'
-                img.save(pdf_path, 'PDF')
-                merger.append(pdf_path)
-                # Remove temporary PDF
-                os.remove(pdf_path)
-
-        # Save merged PDF
-        merged_pdf_path = os.path.join(
-            save_folder, f"{item_name}_receipt_merged.pdf")
-        merger.write(merged_pdf_path)
-        merger.close()
-
-        # # Remove individual files after merging
-        # for file_path, _ in downloaded_files:
-        #     os.remove(file_path)
     print(hkd_price)
     print(rmb_price)
     hkd_price_total = fsum(hkd_price)

@@ -1,6 +1,14 @@
 # Notion to Reimbursement
 Since we are using Notion as our productive tool, I write a Python script to faciliate the procedure of reimbursement and connect our Notion page to reimbursement form.
 
+# New: Add Merge PDF
+If you want to merge all your proof of payment into one PDF, you can checkout the `merge_pdf` branch.
+
+```bash
+git checkout merge_pdf
+``` 
+You will need to install the package in `requirements.txt`.
+
 See our Notion page for more details.
 ##  Install and config
 Currently, You have to download the code and install the necessary packages. (maybe later we can host a cloud service). I assume you have set up the conda environment. Normally, we need three packages
